@@ -5,50 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - name: Build APK No Matter What
+      - name: SHOW ME YOUR FILES
         run: |
+          echo "=== ROOT FILES ==="
           ls -la
-          echo "--- Checking for package.json ---"
-          find . -name "package.json" -not -path "*/node_modules/*" || true
-          
-          # If no package.json at root, check subfolders and use first one found
-          if [ ! -f package.json ]; then
-            FOUND=$(find . -name "package.json" -not -path "*/node_modules/*" | head -n1)
-            if [ -n "$FOUND" ]; then
-              DIR=$(dirname $FOUND)
-              echo "Found in $DIR, moving to root"
-              cp -r $DIR/* . || true
-              cp -r $DIR/.* . 2>/dev/null || true
-            else
-              echo "NO package.json found - creating minimal one"
-              echo '{"name":"vendoros","version":"1.0.0","type":"module","scripts":{"build":"vite build"}}' > package.json
-              npm i -D vite @capacitor/cli @capacitor/core @capacitor/android || true
-            fi
-          fi
-          
-          ls -la
-          cat package.json || true
-          npm install --force || npm install --legacy-peer-deps || true
-          npm run build || npx vite build || mkdir -p dist && echo "<h1>VendorOS</h1>" > dist/index.html || true
-          ls -la dist || ls -la build || ls -la out || true
-          
-          # Create capacitor config pointing to wherever build is
-          if [ -d dist ]; then WEB="dist"; elif [ -d build ]; then WEB="build"; else WEB="."; fi
-          echo "{\"appId\":\"com.vendoros.app\",\"appName\":\"VendorOS\",\"webDir\":\"$WEB\"}" > capacitor.config.json
-          
-          npx cap add android || true
-          npx cap sync android || true
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: VendorOS-APK
-          path: "**/app-debug.apk"
+          echo "=== FIND ALL ==="
+          find . -type f | head -n 100
+          echo "=== PACKAGE.JSON LOCATION ==="
+          find . -name "package.json" -not -path "*/node_modules/*"
+          echo "=== DONE ==="
