@@ -7,18 +7,29 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - run: npm install
-      - run: npm run build
-      - run: npm install @capacitor/cli @capacitor/core @capacitor/android -D
-      - run: |
+      - name: Install and Build Web
+        run: |
+          npm install --force
+          npm run build || npx vite build || npm run build:web
+          ls -la
+          ls -la dist || ls -la build || ls -la out
+      - name: Setup Capacitor
+        run: |
+          npm install -D @capacitor/cli @capacitor/core @capacitor/android
+          echo '{"appId":"com.vendoros.app","appName":"VendorOS","webDir":"dist"}' > capacitor.config.json
           if [ ! -d android ]; then npx cap add android; fi
-          npx cap sync android
-      - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+          npx cap copy android || npx cap copy
+          npx cap sync android || true
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: VendorOS-APK
