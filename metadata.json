@@ -1,0 +1,6 @@
+{
+  "name": "VendorOS",
+  "description": "VendorOS - 3-in-1 Super App: WhatsApp/Instagram Auto-Reply, Trust Badge & Proofs, and HandworkNG Skilled Artisan Directory with Secure OPay Gateway",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
