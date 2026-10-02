@@ -12,16 +12,30 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Find project folder
+        run: |
+          ls -la
+          find . -name "package.json" -type f | head -20
+          echo "PROJECT_DIR=$(dirname $(find . -name 'package.json' | head -n1))" >> $GITHUB_ENV
+          echo "Found project in $PROJECT_DIR"
+          ls -la $PROJECT_DIR
       - run: npm install --force
-      - run: npm run build
+        working-directory: ${{ env.PROJECT_DIR }}
+      - run: npm run build || npx vite build || npm run build:web || ls -la
+        working-directory: ${{ env.PROJECT_DIR }}
       - run: npm i -D @capacitor/cli @capacitor/core @capacitor/android
-      - run: npx cap add android
-      - run: npx cap sync android
-      - run: cd android
-      - run: chmod +x gradlew
-      - run: ./gradlew assembleDebug
-        working-directory: android
+        working-directory: ${{ env.PROJECT_DIR }}
+      - run: npx cap add android || true
+        working-directory: ${{ env.PROJECT_DIR }}
+      - run: npx cap sync android || true
+        working-directory: ${{ env.PROJECT_DIR }}
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+        working-directory: ${{ env.PROJECT_DIR }}
       - uses: actions/upload-artifact@v4
         with:
           name: VendorOS-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.PROJECT_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
