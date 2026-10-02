@@ -12,15 +12,30 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Install and Build
+
+      - name: Install and Build Web
         run: |
           npm install
           npm run build || true
-      - name: Build Android
+          ls -la
+
+      - name: Create Android Project
         run: |
-          chmod +x./gradlew || true
-         ./gradlew assembleDebug ||./gradlew build
-      - uses: actions/upload-artifact@v4
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap add android || true
+          npx cap copy android || true
+          npx cap sync android || true
+          ls -la android || true
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+         ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: VendorOS-APK
-          path: "**/build/outputs/apk/debug/*.apk"
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
