@@ -5,31 +5,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Build APK from app folder
+      - name: Build
         run: |
-          ls -la
-          ls -la app/
           cd app
-          cat package.json
           npm install --force
           npm run build
-          ls -la dist || ls -la build
           npx cap add android || true
           npx cap sync android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
