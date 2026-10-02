@@ -1,44 +1,29 @@
 name: Build APK
 on: push
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Build and Generate APK + AAB
+      - name: Build APK
         run: |
-          set -e
-          if [ -f "app/package.json" ]; then cd app; fi
+          cd app
           npm install --force
           npm run build
           npx cap add android || true
           npx cap sync android
           cd android
           chmod +x gradlew
-          echo "Building DEBUG APK..."
           ./gradlew assembleDebug
-          echo "Building RELEASE AAB for Play Store..."
-          ./gradlew bundleRelease
-
-      - name: Upload APK for Testing
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: VendorOS-APK-Install-Directly
-          path: "**/build/outputs/apk/debug/*.apk"
-
-      - name: Upload AAB for Play Store
-        uses: actions/upload-artifact@v4
-        with:
-          name: VendorOS-AAB-For-PlayStore-Publish
-          path: "**/build/outputs/bundle/release/*.aab"
+          name: VendorOS-APK-DOWNLOAD-HERE
+          path: app/android/app/build/outputs/apk/debug/app-debug.apk
