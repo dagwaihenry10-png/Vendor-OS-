@@ -1,5 +1,5 @@
 name: Build APK
-on: [push]
+on: push
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,22 +12,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: Build Web
-        run: |
-          npm install
-          npm run build
-      - name: Add Android
-        run: |
-          npm install @capacitor/cli @capacitor/core @capacitor/android -D
-          npx cap add android
-          npx cap sync android
-      - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-         ./gradlew assembleDebug
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - run: npm install
+      - run: npm run build
+      - run: npm install @capacitor/cli @capacitor/core @capacitor/android -D
+      - run: npx cap add android
+      - run: npx cap sync android
+      - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
           name: VendorOS-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
